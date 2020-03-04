@@ -28,10 +28,8 @@ import fs2._
 import org.http4s._
 import org.http4s.server._
 import org.http4s.server.blaze.BlazeServerBuilder
-import org.http4s.server.middleware.{CORS, CORSConfig}
+import org.http4s.server.middleware.CORS
 import org.http4s.syntax.kleisli._
-import pureconfig._
-import pureconfig.generic.auto._
 import org.backuity.ansi.AnsiFormatter.FormattedHelper
 import org.log4s._
 
@@ -85,14 +83,6 @@ object Main extends CommandApp(
         implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
         implicit val timer = IO.timer(ExecutionContext.global)
 
-        val corsConfig = CORSConfig(
-          anyOrigin = true,
-          anyMethod = false,
-          allowedMethods = Some(Set("GET")),
-          allowCredentials = true,
-          maxAge = 1.day.toSeconds
-        )
-
         val commonMiddleware: HttpMiddleware[IO] = { (routes: HttpRoutes[IO]) =>
           CORS(routes)
         }
@@ -101,9 +91,8 @@ object Main extends CommandApp(
           opt.fold(logger.info(downLog))({ _ => logger.info(upLog) })
 
         val stream: Stream[IO, ExitCode] = {
-          import Conf._
           for {
-            conf       <- Stream.eval(LoadConf(configPath).as[Conf])
+            conf       <- Stream.eval(Conf.loadF[IO](configPath))
             simpleSources = conf
               .layers
               .values
@@ -147,7 +136,8 @@ object Main extends CommandApp(
             }
             ogcService = new OgcService(wmsModel, wcsModel, wmtsModel, new URL(publicUrl))
             exitCode   <- BlazeServerBuilder[IO]
-              .withIdleTimeout(Duration.Inf) // for test purposes only
+              .withIdleTimeout(Duration.Inf)
+              .withResponseHeaderTimeout(Duration.Inf)
               .enableHttp2(true)
               .bindHttp(port, interface)
               .withHttpApp(Router(

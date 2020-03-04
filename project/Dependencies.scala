@@ -35,7 +35,7 @@ object Dependencies {
   val geotrellisS3 = "org.locationtech.geotrellis" %% "geotrellis-s3" % "3.2.0"
   val geotrellisGdal = "org.locationtech.geotrellis" %% "geotrellis-gdal" % "3.2.0"
   val geotrellisServerOgc = "com.azavea.geotrellis" %% "geotrellis-server-ogc" % "4.1.0"
-  val geotrellisPointcloud ="com.azavea.geotrellis" %% "geotrellis-pointcloud" % "0.3.1"
+  val geotrellisPointcloud ="com.azavea.geotrellis" %% "geotrellis-pointcloud" % "0.3.4-19b0b54"
   
   val decline = "com.monovore" %% "decline" % "0.5.0"
   val http4sBlazeClient = http4sVer("blaze-client")
@@ -45,6 +45,7 @@ object Dependencies {
   val http4sXml = http4sVer("scala-xml")
 
   val pureConfig = "com.github.pureconfig" %% "pureconfig" % "0.12.2"
+  val pureConfigCatsEffect = "com.github.pureconfig" %% "pureconfig-cats-effect" % "0.12.2"
   val scalatest = "org.scalatest" %% "scalatest" % "3.1.1"
   
   val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"

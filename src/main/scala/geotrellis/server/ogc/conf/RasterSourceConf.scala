@@ -16,6 +16,7 @@
 
 package geotrellis.server.ogc.conf
 
+import geotrellis.pointcloud.raster.ept.DEMRasterSource
 import geotrellis.raster._
 import geotrellis.raster.geotiff.GeoTiffRasterSource
 import geotrellis.store.{GeoTrellisPath, GeoTrellisRasterSourceLegacy}
@@ -42,4 +43,8 @@ case class GeoTrellis(
 /** A geotiff (COG) raster source */
 case class GeoTiff(uri: String) extends RasterSourceConf {
   def toRasterSources: List[GeoTiffRasterSource] = GeoTiffRasterSource(uri) :: Nil
+}
+
+case class EPT(catalogUri: String) extends RasterSourceConf {
+  def toRasterSources: List[RasterSource] = DEMRasterSource(catalogUri) :: Nil
 }

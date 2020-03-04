@@ -16,12 +16,11 @@
 
 package geotrellis.server.ogc.conf
 
-import geotrellis.server.ogc.style.ClipDefinition
-import geotrellis.server.ogc.ows
-import geotrellis.server.ogc.wms.WmsParentLayerMeta
-
-import pureconfig.generic.auto._
 import pureconfig._
+import pureconfig.generic.auto._
+import pureconfig.module.catseffect.syntax._
+import cats.effect.Sync
+import com.typesafe.config.ConfigFactory
 import scalaxb.DataRecord
 
 /**
@@ -43,8 +42,11 @@ case class Conf(
 )
 
 object Conf {
-  lazy val conf: Conf = ConfigSource.default.loadOrThrow[Conf]
-  implicit def ConfObjectToClass(obj: Conf.type): Conf = conf
+  lazy val load: Conf = ConfigSource.default.loadOrThrow[Conf]
+  def loadF[F[_]: Sync](configPath: Option[String]): F[Conf] =
+    ConfigSource.fromConfig(ConfigFactory.load(configPath.getOrElse("application.conf"))).loadF[F, Conf]
+
+  implicit def ConfObjectToClass(obj: Conf.type): Conf = load
 
   // This is a work-around to use pureconfig to read scalaxb generated case classes
   // DataRecord should never be specified from configuration, this satisfied the resolution

@@ -81,6 +81,7 @@ libraryDependencies ++= Seq(
   http4sXml.value,
   logback % Runtime,
   pureConfig,
+  pureConfigCatsEffect,
   scaffeine,
   decline,
   scalatest % Test
