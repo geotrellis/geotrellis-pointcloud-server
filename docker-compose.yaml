@@ -3,7 +3,7 @@ services:
   server:
     image: geotrellis/geotrellis-pointcloud-server:latest
     ports:
-      - "9092:9092"
+      - "9000:9000"
     volumes:
       - ${PWD}/data:/app/data
     command: --public-url http://localhost:9000/
