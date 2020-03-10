@@ -1,4 +1,7 @@
-# GeoTrellis PointCloud server
+# GeoTrellis PointCloud OGC Server 
+
+[![Build Status](https://travis-ci.org/geotrellis/geotrellis-pointcloud-server.svg?branch=master)](https://travis-ci.org/geotrellis/geotrellis-pointcloud-server)
+[![Join the chat at https://gitter.im/geotrellis/geotrellis](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/geotrellis/geotrellis?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 To run this demo you can use the following Makefile commands:
 

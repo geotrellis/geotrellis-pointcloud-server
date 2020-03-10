@@ -78,6 +78,8 @@ libraryDependencies ++= Seq(
   http4sBlazeClient.value,
   http4sCirce.value,
   http4sXml.value,
+  cats.value,
+  catsEffect.value,
   logback % Runtime,
   pureConfig,
   pureConfigCatsEffect,
