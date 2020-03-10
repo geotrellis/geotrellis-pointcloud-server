@@ -23,10 +23,10 @@ $ make run-docker
 
 Makefile contains some shortcuts to simplify the demo run.
 
-| Command          | Description
-|------------------|------------------------------------------------------------|
-|run               |Run server from sbt                                         |
-|assembly          |Build assembly jar                                          |
-|run-assembly      |Run assembly jar                                            |
-|docker            |Build a docker container                                    |
-|run-docker        |Run assembly jar inside a docker container                  |
+| Command          | Description                                                              |
+|------------------|--------------------------------------------------------------------------|
+|run               |Run server from sbt                                                       |
+|assembly          |Build assembly jar                                                        |
+|run-assembly      |Run assembly jar                                                          |
+|docker            |Build a docker container                                                  |
+|run-docker        |Run assembly jar inside a docker container, alias for `docker-compose up` |

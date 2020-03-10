@@ -17,5 +17,5 @@ docker:
 	./sbt docker
 
 run-docker:
-	docker run --rm -v ${PWD}/data:/app/data -p 9000:9000 geotrellis/geotrellis-pointcloud-server:latest --public-url http://localhost:9000/
+	docker-compose up
 
