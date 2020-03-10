@@ -37,12 +37,13 @@ import cats.implicits._
 import cats.effect._
 import cats.data.Validated._
 import com.github.blemale.scaffeine.{Cache, Scaffeine}
+import org.log4s.getLogger
 
 import java.net.URL
 import scala.concurrent.duration._
 
 class WmsView(wmsModel: WmsModel, serviceUrl: URL) {
-  val logger = org.log4s.getLogger
+  val logger = getLogger
 
   private val histoCache: Cache[OgcLayer, Interpreted[List[Histogram[Double]]]] =
     Scaffeine()

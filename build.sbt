@@ -38,7 +38,6 @@ headerMappings := Map(
   })
 )
 
-assembly / assemblyJarName := "geotrellis-server-ogc-services.jar"
 assembly / test := {}
 sources in (Compile, doc) := (sources in (Compile, doc)).value
 assembly / assemblyMergeStrategy := {
@@ -98,3 +97,32 @@ libraryDependencies += (CrossVersion.partialVersion(scalaVersion.value) match {
   case Some((2, scalaMajor)) if scalaMajor >= 12 => ansiColors212 % Provided
   case Some((2, scalaMajor)) if scalaMajor >= 11 => ansiColors211 % Provided
 })
+
+enablePlugins(DockerPlugin)
+
+// extract docker org
+def dockerize(org: String): String = org.split("\\.").last
+
+imageNames in docker := Seq(
+  // Sets the latest tag
+  ImageName(s"${dockerize(organization.value)}/${name.value}:latest"),
+  // Sets a name with a tag that contains the project version
+  ImageName(
+    namespace = Some(dockerize(organization.value)),
+    repository = name.value,
+    tag = Some("v" + version.value)
+  )
+)
+
+dockerfile in docker := {
+  // The assembly task generates a fat JAR file
+  val artifact: File = assembly.value
+  val artifactTargetPath = s"/app/${artifact.name}"
+
+  new Dockerfile {
+    from("daunnc/pdal-debian:2.0.1")
+    add(artifact, artifactTargetPath)
+    workDir("/app")
+    entryPoint("java", "-jar", artifactTargetPath)
+  }
+}

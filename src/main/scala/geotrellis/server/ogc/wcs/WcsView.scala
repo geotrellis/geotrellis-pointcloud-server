@@ -24,11 +24,12 @@ import org.http4s._
 import org.http4s.dsl.io._
 import cats.effect._
 import cats.data.Validated
+import org.log4s.getLogger
 
 import java.net._
 
 class WcsView(wcsModel: WcsModel, serviceUrl: URL) {
-  val logger = org.log4s.getLogger
+  val logger = getLogger
 
   private def handleError[Result: EntityEncoder[IO, *]](result: Either[Throwable, Result]): IO[Response[IO]] = result match {
     case Right(res) =>
@@ -62,7 +63,7 @@ class WcsView(wcsModel: WcsModel, serviceUrl: URL) {
             logger.debug(ansi"%bold{GetCoverage: ${req.uri}}")
             for {
               getCoverage <- getCoverage.build(p).attempt
-              result      <- handleError(getCoverage)
+              result <- handleError(getCoverage)
             } yield {
               logger.debug(s"getcoverage result: $result")
               result

@@ -38,7 +38,7 @@ import scala.concurrent.ExecutionContext
 import java.net.URL
 
 object Main extends CommandApp(
-  name = "java -jar geotrellis-ogc-server.jar",
+  name = "java -jar geotrellis-pointcloud-server-assembly.jar",
   header = "Host GT layers through WMS, WMTS, and WCS services",
   main = {
     val publicUrlReq =
@@ -81,14 +81,14 @@ object Main extends CommandApp(
 
 
         implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-        implicit val timer = IO.timer(ExecutionContext.global)
+        implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
         val commonMiddleware: HttpMiddleware[IO] = { (routes: HttpRoutes[IO]) =>
           CORS(routes)
         }
 
-        def logOptState[A](opt: Option[A], upLog: String, downLog: String): Unit =
-          opt.fold(logger.info(downLog))({ _ => logger.info(upLog) })
+        def logOptState[A](opt: Option[A], upLog: String, downLog: String): IO[Unit] =
+          IO(opt.fold(logger.info(downLog))(_ => logger.info(upLog)))
 
         val stream: Stream[IO, ExitCode] = {
           for {
@@ -96,14 +96,14 @@ object Main extends CommandApp(
             simpleSources = conf
               .layers
               .values
-              .collect { case ssc@SimpleSourceConf(_, _, _, _, _) => ssc.models }
+              .collect { case ssc @ SimpleSourceConf(_, _, _, _, _) => ssc.models }
               .toList
               .flatten
-            _ <- Stream.eval(IO(logOptState(
+            _ <- Stream.eval(logOptState(
               conf.wms,
               ansi"%green{WMS configuration detected}, starting Web Map Service",
               ansi"%red{No WMS configuration detected}, unable to start Web Map Service"
-            )))
+            ))
             wmsModel = conf.wms.map { svc =>
               WmsModel(
                 svc.serviceMetadata,
@@ -111,11 +111,11 @@ object Main extends CommandApp(
                 svc.layerSources(simpleSources)
               )
             }
-            _ <- Stream.eval(IO(logOptState(
+            _ <- Stream.eval(logOptState(
               conf.wmts,
               ansi"%green{WMTS configuration detected}, starting Web Map Tiling Service",
               ansi"%red{No WMTS configuration detected}, unable to start Web Map Tiling Service"
-            )))
+            ))
             wmtsModel = conf.wmts.map { svc =>
               WmtsModel(
                 svc.serviceMetadata,
@@ -123,11 +123,11 @@ object Main extends CommandApp(
                 svc.layerSources(simpleSources)
               )
             }
-            _ <- Stream.eval(IO(logOptState(
+            _ <- Stream.eval(logOptState(
               conf.wcs,
               ansi"%green{WCS configuration detected}, starting Web Coverage Service",
               ansi"%red{No WCS configuration detected}, unable to start Web Coverage Service"
-            )))
+            ))
             wcsModel = conf.wcs.map { svc =>
               WcsModel(
                 svc.serviceMetadata,
