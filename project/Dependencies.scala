@@ -30,12 +30,14 @@ object Dependencies {
   val crossScalaVer = List("2.12.10", "2.11.12")
   val scalaVer = crossScalaVer.head
 
+  val cats = catsVersion("core")
+  val catsEffect = catsVersion("effect")
   val scaffeine = "com.github.blemale" %% "scaffeine" % "2.6.0"
   val concHashMap = "com.googlecode.concurrentlinkedhashmap" % "concurrentlinkedhashmap-lru" % "1.4.2"
   val geotrellisS3 = "org.locationtech.geotrellis" %% "geotrellis-s3" % "3.2.0"
   val geotrellisGdal = "org.locationtech.geotrellis" %% "geotrellis-gdal" % "3.2.0"
   val geotrellisServerOgc = "com.azavea.geotrellis" %% "geotrellis-server-ogc" % "4.1.0"
-  val geotrellisPointcloud ="com.azavea.geotrellis" %% "geotrellis-pointcloud" % "0.3.4-19b0b54"
+  val geotrellisPointcloud ="com.azavea.geotrellis" %% "geotrellis-pointcloud" % "0.3.4-fb7e4a5"
   
   val decline = "com.monovore" %% "decline" % "0.5.0"
   val http4sBlazeClient = http4sVer("blaze-client")

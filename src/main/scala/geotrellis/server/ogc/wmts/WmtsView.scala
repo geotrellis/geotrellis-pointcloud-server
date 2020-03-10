@@ -30,19 +30,22 @@ import com.azavea.maml.eval._
 
 import scalaxb.CanWriteXML
 import org.http4s.scalaxml._
-import org.http4s._, org.http4s.dsl.io._, org.http4s.implicits._
+import org.http4s._
+import org.http4s.dsl.io._
+import org.http4s.implicits._
 import org.http4s.circe._
 import _root_.io.circe.syntax._
-import cats._, cats.implicits._
+import cats._
+import cats.implicits._
 import cats.effect._
 import cats.data.Validated._
+import org.log4s.getLogger
 
 import java.io.File
 import java.net._
 
-
 class WmtsView(wmtsModel: WmtsModel, serviceUrl: URL) {
-  val logger = org.log4s.getLogger
+  val logger = getLogger
 
   def responseFor(req: Request[IO])(implicit cs: ContextShift[IO]): IO[Response[IO]] = {
       WmtsParams(req.multiParams) match {
