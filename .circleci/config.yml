@@ -1,0 +1,46 @@
+version: 2.1
+jobs:
+  scala-212:
+    docker:
+      - image: daunnc/pdal-debian:2.0.1
+    environment:
+        SCALA_VERSION: 2.12.10
+    steps:
+      - checkout
+      - restore_cache:
+          key: sbt-cache
+      - run:
+          name: Build
+          command: ./sbt -J-Xmx2G "++$SCALA_VERSION" compile
+      - save_cache:
+          key: sbt-cache
+          paths:
+            - "~/.ivy2/cache"
+            - "~/.couriser/cache"
+            - "~/.sbt"
+            - "~/.m2"
+  scala-211:
+    docker:
+      - image: daunnc/pdal-debian:2.0.1
+    environment:
+        SCALA_VERSION: 2.11.12
+    steps:
+      - checkout
+      - restore_cache:
+          key: sbt-cache
+      - run:
+          name: Build
+          command: ./sbt -J-Xmx2G "++$SCALA_VERSION" compile
+      - save_cache:
+          key: sbt-cache
+          paths:
+            - "~/.ivy2/cache"
+            - "~/.couriser/cache"
+            - "~/.sbt"
+            - "~/.m2"
+
+workflows:
+  build-test-deploy:
+    jobs:
+      - scala-212
+      - scala-211
