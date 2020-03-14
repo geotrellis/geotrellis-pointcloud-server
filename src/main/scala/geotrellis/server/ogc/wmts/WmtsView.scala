@@ -18,30 +18,20 @@ package geotrellis.server.ogc.wmts
 
 import geotrellis.server._
 import geotrellis.server.ogc._
-import geotrellis.server.ogc.style._
 import geotrellis.server.ogc.params.ParamError
 import geotrellis.server.ogc.wmts.WmtsParams.{GetCapabilities, GetTile}
 
-import geotrellis.layer._
-import geotrellis.proj4._
-import geotrellis.raster.render.{ColorMap, ColorRamp, Png}
-import geotrellis.raster._
 import com.azavea.maml.eval._
-
-import scalaxb.CanWriteXML
 import org.http4s.scalaxml._
 import org.http4s._
 import org.http4s.dsl.io._
-import org.http4s.implicits._
 import org.http4s.circe._
 import _root_.io.circe.syntax._
-import cats._
 import cats.implicits._
 import cats.effect._
 import cats.data.Validated._
 import org.log4s.getLogger
 
-import java.io.File
 import java.net._
 
 class WmtsView(wmtsModel: WmtsModel, serviceUrl: URL) {
