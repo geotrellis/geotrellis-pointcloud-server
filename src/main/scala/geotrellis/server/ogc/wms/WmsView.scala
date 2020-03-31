@@ -46,7 +46,7 @@ class WmsView(wmsModel: WmsModel, serviceUrl: URL) {
   private val histoCache: Cache[OgcLayer, Interpreted[List[Histogram[Double]]]] =
     Scaffeine()
       .recordStats()
-      .expireAfterWrite(1.hour)
+      .expireAfterWrite(1 hour)
       .maximumSize(500)
       .build[OgcLayer, Interpreted[List[Histogram[Double]]]]()
 
