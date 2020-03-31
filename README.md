@@ -30,3 +30,11 @@ Makefile contains some shortcuts to simplify the demo run.
 |run-assembly      |Run assembly jar                                                          |
 |docker            |Build a docker container                                                  |
 |run-docker        |Run assembly jar inside a docker container, alias for `docker-compose up` |
+
+## AWS S3 Configuration
+
+For the proper work with [usgs-lpc-ny-cl-ess-lchamp layer](./src/main/resources/application.conf#L222) it is necessary to 
+configure AWS S3 Credentials via env variables or via `~/.aws/credentials` file. The region of this layer is `us-west-2`.
+
+PDAL also requires `AWS_CONFIG_FILE` variable to point to the `~/.aws/credentials` file. 
+Check out the [docker-compose.yaml](./docker-compose.yaml) file for the min necessary configuration.
