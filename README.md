@@ -39,6 +39,16 @@ configure AWS S3 Credentials via env variables or via `~/.aws/credentials` file.
 PDAL also requires `AWS_CONFIG_FILE` variable to point to the `~/.aws/credentials` file. 
 Check out the [docker-compose.yaml](./docker-compose.yaml) file for the min necessary configuration.
 
+If you want to view the [usgs-lpc-ny-cl-ess-lchamp layer](./src/main/resources/application.conf#L222) S3 layer, please modify the
+application.conf file to include this layer in the services descriptions: 
+
+```yaml
+layer-definitions = [
+  ${layers.red-rocks},
+  ${layers.usgs-lpc-ny-cl-ess-lchamp}
+]
+```
+
 ## Ingest 
 
 Some ingest docs can be found [here](https://github.com/connormanning/entwine#usage). This section would briefly describe the ingest
