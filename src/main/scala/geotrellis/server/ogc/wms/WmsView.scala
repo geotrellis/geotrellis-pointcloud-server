@@ -25,19 +25,17 @@ import geotrellis.raster.RasterExtent
 import geotrellis.raster._
 import com.azavea.maml.error._
 import com.azavea.maml.eval._
-import scalaxb.CanWriteXML
 import org.http4s.scalaxml._
 import org.http4s.circe._
 import org.http4s._
 import org.http4s.dsl.io._
-import org.http4s.implicits._
 import _root_.io.circe.syntax._
-import cats._
 import cats.implicits._
 import cats.effect._
 import cats.data.Validated._
 import com.github.blemale.scaffeine.{Cache, Scaffeine}
 import org.log4s.getLogger
+import org.backuity.ansi.AnsiFormatter.FormattedHelper
 
 import java.net.URL
 import scala.concurrent.duration._
@@ -52,6 +50,13 @@ class WmsView(wmsModel: WmsModel, serviceUrl: URL) {
       .maximumSize(500)
       .build[OgcLayer, Interpreted[List[Histogram[Double]]]]()
 
+  private val tileCache: Cache[GetMap, Array[Byte]] =
+    Scaffeine()
+      .recordStats()
+      .expireAfterWrite(1 hour)
+      .maximumSize(500)
+      .build[GetMap, Array[Byte]]()
+
   def responseFor(req: Request[IO])(implicit cs: ContextShift[IO]): IO[Response[IO]] = {
     WmsParams(req.multiParams) match {
       case Invalid(errors) =>
@@ -60,11 +65,13 @@ class WmsView(wmsModel: WmsModel, serviceUrl: URL) {
         BadRequest(msg)
 
       case Valid(wmsReq: GetCapabilities) =>
+        logger.debug(ansi"%bold{GetCapabilities: ${req.uri}}")
         Ok(new CapabilitiesView(wmsModel, serviceUrl).toXML)
 
       case Valid(wmsReq: GetMap) =>
+        logger.debug(ansi"%bold{GetMap: ${req.uri}}")
         val re = RasterExtent(wmsReq.boundingBox, wmsReq.width, wmsReq.height)
-        wmsModel.getLayer(wmsReq).map { layer =>
+        lazy val res = wmsModel.getLayer(wmsReq).map { layer =>
           val evalExtent = layer match {
             case sl @ SimpleOgcLayer(_, _, _, _, _) =>
               LayerExtent.identity(sl)
@@ -98,6 +105,7 @@ class WmsView(wmsModel: WmsModel, serviceUrl: URL) {
           }.attempt flatMap {
             case Right(Valid((mbtile, hists))) => // success
               val rendered = Render.singleband(mbtile, layer.style, wmsReq.format, hists)
+              tileCache.put(wmsReq, rendered)
               Ok(rendered)
             case Right(Invalid(errs)) => // maml-specific errors
               logger.debug(errs.toList.toString)
@@ -112,6 +120,11 @@ class WmsView(wmsModel: WmsModel, serviceUrl: URL) {
           case None =>
             BadRequest(s"Layer not found (no layer name provided in request)")
         })
+
+        tileCache.getIfPresent(wmsReq) match {
+          case Some(rendered) => Ok(rendered)
+          case _              => res
+        }
     }
   }
 }

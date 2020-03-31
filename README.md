@@ -38,3 +38,24 @@ configure AWS S3 Credentials via env variables or via `~/.aws/credentials` file.
 
 PDAL also requires `AWS_CONFIG_FILE` variable to point to the `~/.aws/credentials` file. 
 Check out the [docker-compose.yaml](./docker-compose.yaml) file for the min necessary configuration.
+
+## Ingest 
+
+Some ingest docs can be found [here](https://github.com/connormanning/entwine#usage). This section would briefly describe the ingest
+process as well with some important parameters descriptions.
+
+The simple ingest can be launched via the following command:
+
+```bash
+mkdir ~/entwine
+docker run -it -v ~/entwine:/entwine connormanning/entwine build \
+    -i https://data.entwine.io/red-rocks.laz \
+    -o /entwine/red-rocks
+```
+
+* All extra parameters supported by the catalog build process are described [here](https://github.com/connormanning/entwine/blob/master/app/build.cpp#L54-L196).
+* In order to update the same catalog, preset the [bounds](https://github.com/connormanning/entwine/blob/master/app/build.cpp#L97) parameter. 
+It will make possible to ingest some new files into the same catalog that are inside of the predefined bounds.
+* [span](https://github.com/connormanning/entwine/blob/master/app/build.cpp#L79) allows to specify the amount of voxels per dimension, a pretty 
+important for the catalog read performance parameter. 
+

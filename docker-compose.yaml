@@ -6,7 +6,7 @@ services:
       - "9000:9000"
     volumes:
       - ${PWD}/data:/app/data
-      - ${PWD}/.aws/credentials:/root/.aws/credentials
+      - ~/.aws/credentials:/root/.aws/credentials
     environment:
       # A PDAL setting, path to AWS credentials file:
       # https://github.com/connormanning/arbiter/blob/e9f91be5d7b36213e82bab86c1810f9bcc9225d3/arbiter/drivers/s3.cpp#L301

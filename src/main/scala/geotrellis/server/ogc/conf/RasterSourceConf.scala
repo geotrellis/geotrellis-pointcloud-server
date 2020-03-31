@@ -46,5 +46,5 @@ case class GeoTiff(uri: String) extends RasterSourceConf {
 }
 
 case class EPT(catalogUri: String) extends RasterSourceConf {
-  def toRasterSources: List[RasterSource] = DEMRasterSource(catalogUri) :: Nil
+  def toRasterSources: List[RasterSource] = DEMRasterSource(catalogUri, threads = Some(Runtime.getRuntime.availableProcessors())) :: Nil
 }

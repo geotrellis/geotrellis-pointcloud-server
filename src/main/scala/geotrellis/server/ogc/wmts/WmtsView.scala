@@ -31,11 +31,22 @@ import cats.implicits._
 import cats.effect._
 import cats.data.Validated._
 import org.log4s.getLogger
+import com.github.blemale.scaffeine.{Cache, Scaffeine}
+import org.backuity.ansi.AnsiFormatter.FormattedHelper
+
+import scala.concurrent.duration._
 
 import java.net._
 
 class WmtsView(wmtsModel: WmtsModel, serviceUrl: URL) {
   val logger = getLogger
+
+  private val tileCache: Cache[GetTile, Array[Byte]] =
+    Scaffeine()
+      .recordStats()
+      .expireAfterWrite(1 hour)
+      .maximumSize(500)
+      .build[GetTile, Array[Byte]]()
 
   def responseFor(req: Request[IO])(implicit cs: ContextShift[IO]): IO[Response[IO]] = {
       WmtsParams(req.multiParams) match {
@@ -45,46 +56,57 @@ class WmtsView(wmtsModel: WmtsModel, serviceUrl: URL) {
           BadRequest(msg)
 
         case Valid(wmtsReq: GetCapabilities) =>
+          logger.debug(ansi"%bold{GetCapabilities: ${req.uri}}")
           Ok(new CapabilitiesView(wmtsModel, serviceUrl).toXML)
 
         case Valid(wmtsReq: GetTile) =>
+          logger.debug(ansi"%bold{GetTile: ${req.uri}}")
           val tileCol = wmtsReq.tileCol
           val tileRow = wmtsReq.tileRow
           val layerName = wmtsReq.layer
-          wmtsModel.getLayer(wmtsReq).map { layer =>
-            val evalWmts = layer match {
-              case sl @ SimpleTiledOgcLayer(_, _, _, _, _, _) =>
-                LayerTms.identity(sl)
-              case MapAlgebraTiledOgcLayer(_, _, _, _, parameters, expr, _) =>
-                LayerTms(IO.pure(expr), IO.pure(parameters), ConcurrentInterpreter.DEFAULT[IO])
-            }
 
-            val evalHisto = layer match {
-              case sl@SimpleTiledOgcLayer(_, _, _, _, _, _) =>
-                LayerHistogram.identity(sl, 512)
-              case MapAlgebraTiledOgcLayer(_, _, _, _, parameters, expr, _) =>
-                LayerHistogram(IO.pure(expr), IO.pure(parameters), ConcurrentInterpreter.DEFAULT[IO], 512)
-            }
+          lazy val res = {
+            wmtsModel.getLayer(wmtsReq).map { layer =>
+              val evalWmts = layer match {
+                case sl@SimpleTiledOgcLayer(_, _, _, _, _, _) =>
+                  LayerTms.identity(sl)
+                case MapAlgebraTiledOgcLayer(_, _, _, _, parameters, expr, _) =>
+                  LayerTms(IO.pure(expr), IO.pure(parameters), ConcurrentInterpreter.DEFAULT[IO])
+              }
 
-            (evalWmts(0, tileCol, tileRow), evalHisto).parMapN {
-              case (Valid(mbtile), Valid(hists)) =>
-                Valid((mbtile, hists))
-              case (Invalid(errs), _) =>
-                Invalid(errs)
-              case (_, Invalid(errs)) =>
-                Invalid(errs)
-            }.attempt flatMap {
-              case Right(Valid((mbtile, hists))) => // success
-                val rendered = Render.singleband(mbtile, layer.style, wmtsReq.format, hists)
-                Ok(rendered)
-              case Right(Invalid(errs)) => // maml-specific errors
-                logger.debug(errs.toList.toString)
-                BadRequest(errs.asJson)
-              case Left(err) =>            // exceptions
-                logger.error(err.toString)
-                InternalServerError(err.toString)
-            }
-          }.headOption.getOrElse(BadRequest(s"Layer ($layerName) not found"))
+              val evalHisto = layer match {
+                case sl@SimpleTiledOgcLayer(_, _, _, _, _, _) =>
+                  LayerHistogram.identity(sl, 512)
+                case MapAlgebraTiledOgcLayer(_, _, _, _, parameters, expr, _) =>
+                  LayerHistogram(IO.pure(expr), IO.pure(parameters), ConcurrentInterpreter.DEFAULT[IO], 512)
+              }
+
+              (evalWmts(0, tileCol, tileRow), evalHisto).parMapN {
+                case (Valid(mbtile), Valid(hists)) =>
+                  Valid((mbtile, hists))
+                case (Invalid(errs), _) =>
+                  Invalid(errs)
+                case (_, Invalid(errs)) =>
+                  Invalid(errs)
+              }.attempt flatMap {
+                case Right(Valid((mbtile, hists))) => // success
+                  val rendered = Render.singleband(mbtile, layer.style, wmtsReq.format, hists)
+                  tileCache.put(wmtsReq, rendered)
+                  Ok(rendered)
+                case Right(Invalid(errs)) => // maml-specific errors
+                  logger.debug(errs.toList.toString)
+                  BadRequest(errs.asJson)
+                case Left(err) => // exceptions
+                  logger.error(err.toString)
+                  InternalServerError(err.toString)
+              }
+            }.headOption.getOrElse(BadRequest(s"Layer ($layerName) not found"))
+          }
+
+          tileCache.getIfPresent(wmtsReq) match {
+            case Some(rendered) => Ok(rendered)
+            case _              => res
+          }
       }
   }
 }
