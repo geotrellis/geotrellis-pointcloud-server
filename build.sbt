@@ -2,9 +2,9 @@ import Dependencies._
 import de.heikoseeberger.sbtheader._
 
 name := "geotrellis-pointcloud-server"
-version := "0.1.0-SNAPSHOT"
-scalaVersion := "2.12.10"
-crossScalaVersions := Seq("2.12.10", "2.11.12")
+version := "0.1.2-SNAPSHOT"
+scalaVersion := "2.12.11"
+crossScalaVersions := Seq("2.12.11", "2.11.12")
 organization := "geotrellis"
 scalacOptions ++= Seq(
   "-deprecation",
