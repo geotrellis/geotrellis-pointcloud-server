@@ -19,3 +19,5 @@ docker:
 run-docker:
 	docker-compose up
 
+run-docker-raw:
+	docker run --rm -it -p 9000:9000 -v ${PWD}/data:/app/data geotrellis/geotrellis-pointcloud-server:latest --public-url http://localhost:9000/

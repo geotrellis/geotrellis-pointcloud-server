@@ -30,6 +30,7 @@ Makefile contains some shortcuts to simplify the demo run.
 |run-assembly      |Run assembly jar                                                          |
 |docker            |Build a docker container                                                  |
 |run-docker        |Run assembly jar inside a docker container, alias for `docker-compose up` |
+|run-docker-raw    |`docker-compose up` alternative but without docker-compose usage          |
 
 ## AWS S3 Configuration
 
