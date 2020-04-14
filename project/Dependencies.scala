@@ -34,10 +34,10 @@ object Dependencies {
   val catsEffect = catsVersion("effect")
   val scaffeine = "com.github.blemale" %% "scaffeine" % "2.6.0"
   val concHashMap = "com.googlecode.concurrentlinkedhashmap" % "concurrentlinkedhashmap-lru" % "1.4.2"
-  val geotrellisS3 = "org.locationtech.geotrellis" %% "geotrellis-s3" % "3.2.0"
-  val geotrellisGdal = "org.locationtech.geotrellis" %% "geotrellis-gdal" % "3.2.0"
-  val geotrellisServerOgc = "com.azavea.geotrellis" %% "geotrellis-server-ogc" % "4.1.0"
-  val geotrellisPointcloud ="com.azavea.geotrellis" %% "geotrellis-pointcloud" % "0.3.4-9ff7167"
+  val geotrellisS3 = "org.locationtech.geotrellis" %% "geotrellis-s3" % "3.3.0"
+  val geotrellisGdal = "org.locationtech.geotrellis" %% "geotrellis-gdal" % "3.3.0"
+  val geotrellisServerOgc = "com.azavea.geotrellis" %% "geotrellis-server-ogc" % "4.1.0-25-g9e25a48-SNAPSHOT"
+  val geotrellisPointcloud ="com.azavea.geotrellis" %% "geotrellis-pointcloud" % "0.3.4-4b607ef"
   
   val decline = "com.monovore" %% "decline" % "1.0.0"
   val http4sBlazeClient = http4sVer("blaze-client")
@@ -51,7 +51,6 @@ object Dependencies {
   val scalatest = "org.scalatest" %% "scalatest" % "3.1.1"
   
   val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
-  val droste = "io.higherkindness" %% "droste-core" % "0.8.0"
 
   // This dependency differs between scala 2.11 and 2.12
   val ansiColors211 = "org.backuity" %% "ansi-interpolator" % "1.1"

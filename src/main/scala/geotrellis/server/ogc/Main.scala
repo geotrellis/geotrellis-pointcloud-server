@@ -79,7 +79,6 @@ object Main extends CommandApp(
             logger.info(ansi"%red{Warning}: No configuration path provided. Loading defaults.")
         }
 
-
         implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
         implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
@@ -96,9 +95,8 @@ object Main extends CommandApp(
             simpleSources = conf
               .layers
               .values
-              .collect { case ssc @ SimpleSourceConf(_, _, _, _, _) => ssc.models }
+              .collect { case rsc @ RasterSourceConf(_, _, _, _, _, _, _) => rsc.toLayer }
               .toList
-              .flatten
             _ <- Stream.eval(logOptState(
               conf.wms,
               ansi"%green{WMS configuration detected}, starting Web Map Service",

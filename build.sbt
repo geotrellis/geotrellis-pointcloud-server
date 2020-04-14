@@ -2,7 +2,7 @@ import Dependencies._
 import de.heikoseeberger.sbtheader._
 
 name := "geotrellis-pointcloud-server"
-version := "0.1.2-SNAPSHOT"
+version := "0.2.0-SNAPSHOT"
 scalaVersion := "2.12.11"
 crossScalaVersions := Seq("2.12.11", "2.11.12")
 organization := "geotrellis"
@@ -63,7 +63,11 @@ Global / cancelable := true
 useCoursier := false
 javaOptions ++= Seq("-Djava.library.path=/usr/local/lib")
 
-resolvers += "GeoTrellis Bintray Repository" at "https://dl.bintray.com/azavea/geotrellis/"
+resolvers ++= Seq(
+  Resolver.bintrayRepo("azavea", "geotrellis"),
+  Resolver.sonatypeRepo("releases"),
+  Resolver.sonatypeRepo("snapshots")
+)
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
 addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.1" cross CrossVersion.full)

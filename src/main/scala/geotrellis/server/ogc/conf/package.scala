@@ -18,15 +18,15 @@ package geotrellis.server.ogc
 
 import geotrellis.server.ogc.wms.wmsScope
 import geotrellis.server.ogc.style._
-
 import geotrellis.proj4.CRS
 import geotrellis.vector.Extent
-import geotrellis.raster.TileLayout
+import geotrellis.raster.{ResampleMethod, TileLayout, resample}
 import geotrellis.raster.render.{ColorMap, ColorRamp}
 
 import com.azavea.maml.ast._
 import com.azavea.maml.ast.codec.tree._
 import com.typesafe.config._
+import geotrellis.raster.io.geotiff.{Auto, AutoHigherResolution, Base, OverviewStrategy}
 import io.circe._
 import io.circe.parser._
 import pureconfig._
@@ -75,7 +75,7 @@ package object conf {
    * HOCON doesn't naturally handle unquoted strings which contain decimals ('.') very well.
    *  As a result, some special configuration handling is required here to allow unquoted
    *  strings specifically when we know we're trying to decode a ColorMap.
-   * 
+   *
    * @note It is currently difficult to handle double-keyed maps. A workaround
    * has been provided, but it only works with doubles that explicitly decimal
    * pad to tenths (0.0 is OK, 0 is to be avoided)
@@ -91,7 +91,7 @@ package object conf {
               val value = cv.unwrapped.asInstanceOf[String]
               key -> value
             }
-          case ConfigValueType.STRING => 
+          case ConfigValueType.STRING =>
             List(k -> v.unwrapped.asInstanceOf[String])
           case _ =>
             List(k -> v.toString)
@@ -99,7 +99,7 @@ package object conf {
       }).map({ case (k, v) =>
         val key = k.toDouble
         val value = java.lang.Long.decode(v).toInt
-        key -> value 
+        key -> value
       }).toMap
       numericMap
     }
@@ -152,6 +152,37 @@ package object conf {
         case None => throw new Exception(s"Invalid layout: $layout. Should be (layoutCols, layoutRows, tileCols, tileRows)")
       }
     }
+
+  implicit val resampleMethodReader: ConfigReader[ResampleMethod] =
+    ConfigReader[String].map {
+      case "nearest-neighbor"  => resample.NearestNeighbor
+      case "bilinear"          => resample.Bilinear
+      case "cubic-convolution" => resample.CubicConvolution
+      case "cubic-spline"      => resample.CubicSpline
+      case "lanczos"           => resample.Lanczos
+      case "average"           => resample.Average
+      case "mode"              => resample.Mode
+      case "median"            => resample.Median
+      case "max"               => resample.Max
+      case "min"               => resample.Min
+      case "sum"               => resample.Sum
+    }
+
+  implicit val overviewStrategyReader: ConfigReader[OverviewStrategy] = {
+    def parse(strategy: String, input: String): OverviewStrategy =
+      Auto(Try { input.split(s"$strategy-").last.toInt }.toOption.getOrElse(0))
+
+    def parseAuto(str: String): OverviewStrategy  = parse("auto", str)
+    def parseLevel(str: String): OverviewStrategy = parse("level", str)
+
+    ConfigReader[String].map {
+      case "auto-higher-resolution"       => AutoHigherResolution
+      case "base"                         => Base
+      case str if str.startsWith("auto")  => parseAuto(str)
+      case str if str.startsWith("level") => parseLevel(str)
+      case _                              => OverviewStrategy.DEFAULT
+    }
+  }
 
   /** An alternative AST reading strategy that uses a separate json file */
   //private lazy val s3client = AmazonS3ClientBuilder.defaultClient()
